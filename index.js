@@ -4,24 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const { Configuration, OpenAIApi } = require("openai");
-const multer = require("multer");
-const path = require("path");
 require('dotenv').config();
-
-// IMAGE UPLOAD CONFIG
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 1024 * 1024 * 5 },
-});
 
 // ROUTES APP CONFIG
 app.use(express.urlencoded({ extended: true }));
@@ -33,7 +16,6 @@ app.use("/uploads", express.static("uploads"));
 let database = [];
 
 app.post("/resume/create",
-    upload.single("headshotImage"),
     async (req, res) => {
         // OPENAI CONFIG
         const configuration = new Configuration({
@@ -64,14 +46,13 @@ app.post("/resume/create",
             workHistory, //JSON format
         } = req.body;
 
-        const workArray = JSON.parse(workHistory); //an array
+        const workArray = workHistory || []; //an array
 
         const generateID = () => Math.random().toString(36).substring(2,9)
         //👇🏻 group the values into an object
         const newEntry = {
             id: generateID(),
             fullName,
-            image_url: `${BASE_URL}/uploads/${req.file.filename}`,
             currentPosition,
             currentLength,
             currentTechnologies,
