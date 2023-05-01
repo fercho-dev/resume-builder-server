@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const { Configuration, OpenAIApi } = require("openai");
 const multer = require("multer");
 const path = require("path");
@@ -30,22 +31,6 @@ app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
 let database = [];
-
-app.post("/prueba", async (req, res) => {
-    const { Configuration, OpenAIApi } = require("openai");
-    const configuration = new Configuration({
-    apiKey: "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",
-    });
-    const openai = new OpenAIApi(configuration);
-    const response = await openai.createCompletion({
-    model: "text-davinci-003",
-    prompt: "Give a cool slogan for an online sports store",
-    n: 2,
-    max_tokens: 7,
-    temperature: 0,
-    });
-    res.send(response.data)
-})
 
 app.post("/resume/create",
     upload.single("headshotImage"),
@@ -86,7 +71,7 @@ app.post("/resume/create",
         const newEntry = {
             id: generateID(),
             fullName,
-            image_url: `http://localhost:4000/uploads/${req.file.filename}`,
+            image_url: `${BASE_URL}/uploads/${req.file.filename}`,
             currentPosition,
             currentLength,
             currentTechnologies,
